@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { PDF_CONTEXT } from '@/lib/pdfContext';
 import { NextRequest, NextResponse } from 'next/server';
 
-const apiKey = "AIzaSyACpJ5KPSoegr-viI_Z2Kf3ezyxN0QxSJU";
+const apiKey = process.env.GEMINI_API_KEY || "";
 const genAI = new GoogleGenerativeAI(apiKey);
 
 export async function POST(req: NextRequest) {
@@ -34,7 +34,7 @@ Do NOT hallucinate confident answers for things not in the prompt. Use the ambig
 `;
 
     const model = genAI.getGenerativeModel({
-      model: 'gemini-2.5-pro',
+      model: 'gemini-2.5-flash',
       systemInstruction: systemPrompt,
     });
 
