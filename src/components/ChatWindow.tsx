@@ -16,9 +16,10 @@ export default function ChatWindow() {
   ])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [isLecturerMode, setIsLecturerMode] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   
-  const { globalContext, addUnansweredQuestion } = useStore()
+  const { globalContext, addGlobalContext, addUnansweredQuestion } = useStore()
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -36,6 +37,20 @@ export default function ChatWindow() {
     setMessages((prev) => [...prev, userMessage])
     setInput("")
     setIsLoading(true)
+
+    if (isLecturerMode) {
+      addGlobalContext(`Lecturer Note: ${input}`)
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: "✅ დამატებულია კონტექსტში!",
+        },
+      ])
+      setIsLoading(false)
+      return
+    }
 
     try {
       const response = await fetch("/api/chat", {
@@ -117,14 +132,36 @@ export default function ChatWindow() {
         <div ref={messagesEndRef} />
       </div>
 
+      <div className="px-4 py-2 border-t border-gray-800 bg-gray-900 flex justify-end">
+        <button
+          type="button"
+          onClick={() => {
+            if (isLecturerMode) {
+              setIsLecturerMode(false);
+            } else {
+              const pwd = prompt("Enter lecturer password:");
+              if (pwd === "mumla24") setIsLecturerMode(true);
+              else if (pwd) alert("Incorrect password");
+            }
+          }}
+          className={`text-xs px-3 py-1 rounded-full font-medium transition-colors ${
+            isLecturerMode 
+              ? "bg-red-500/20 text-red-400 border border-red-500/30" 
+              : "bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700"
+          }`}
+        >
+          {isLecturerMode ? "🔴 Lecturer Mode ON" : "🔒 Turn on Lecturer Mode"}
+        </button>
+      </div>
+
       <form onSubmit={handleSubmit} className="p-4 bg-gray-900 border-t border-gray-800">
         <div className="relative flex items-center">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="დასვი შეკითხვა პროექტის შესახებ..."
             className="w-full bg-gray-800 text-white placeholder-gray-400 border border-gray-700 rounded-full py-3 pl-5 pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            placeholder={isLecturerMode ? "დაამატე ინფორმაცია მეხსიერებაში..." : "დასვი შეკითხვა პროექტის შესახებ..."}
           />
           <button
             type="submit"
