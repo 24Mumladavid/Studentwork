@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
     const errMsg = error instanceof Error ? error.message : String(error);
     console.error("Gemini API Error:", errMsg);
     return NextResponse.json(
-      { text: "სამწუხაროდ, შეცდომა დაფიქსირდა. გთხოვთ, სცადოთ რამდენიმე წამში." },
+      { text: `[DEBUG] Error: ${errMsg}` },
       { status: 200 }
     );
   }
